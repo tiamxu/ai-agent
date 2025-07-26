@@ -1,0 +1,17 @@
+env: dev
+log_level: debug
+http_srv:
+  address: :8800
+  keep_alive: true
+  read_timeout: 30s
+  write_timeout: 30s
+aliyun:
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  api_key: "sk-dda0881c077849eea532a185e5731d28"
+  llm_model: "qwen-turbo"
+  embedding_model: "text-embedding-v3"
+doubao:
+  base_url: "https://ark.cn-beijing.volces.com/api/v3"
+  api_key: "a1a07cc3-8c02-4874-991f-dacb9f0ee8de"
+  llm_model: "doubao-seed-1-6-250615"
+  embedding_model: ""
