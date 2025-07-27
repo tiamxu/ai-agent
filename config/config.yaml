@@ -5,6 +5,7 @@ http_srv:
   keep_alive: true
   read_timeout: 30s
   write_timeout: 30s
+llm_type: doubao
 aliyun:
   base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
   api_key: "sk-dda0881c077849eea532a185e5731d28"
@@ -15,3 +16,24 @@ doubao:
   api_key: "a1a07cc3-8c02-4874-991f-dacb9f0ee8de"
   llm_model: "doubao-seed-1-6-250615"
   embedding_model: ""
+
+message_templates:
+  system:
+    role: "AI助手"
+    style: "专业且友好"
+    content: |
+      你是一个{role}，你需要用{style}的语气回答问题。
+      回答时请遵循以下规则：
+      1. 提供准确、有用的信息
+      2. 保持简洁明了
+      3. 必要时分点说明
+  
+  # 用户消息模板
+  user:
+    template: "问题：{question}"
+  
+  # 上下文管理配置
+  context:
+    max_history: 10          # 最大历史消息数
+    max_tokens: 4096         # 最大上下文token数
+    enable_stream: true      # 是否启用流式响应
