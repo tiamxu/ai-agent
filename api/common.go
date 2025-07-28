@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
 type Response struct {
@@ -11,7 +11,7 @@ type Response struct {
 	Error   string      `json:"error,omitempty"`
 }
 
-func RespSuccess(c *gin.Context, data interface{}, code ...int) *Response {
+func RespSuccess(ctx *app.RequestContext, data interface{}, code ...int) *Response {
 	status := 200
 	if code != nil {
 		status = code[0]
@@ -29,7 +29,7 @@ func RespSuccess(c *gin.Context, data interface{}, code ...int) *Response {
 	return r
 }
 
-func RespError(c *gin.Context, err error, msg string, code ...int) *Response {
+func RespError(ctx *app.RequestContext, err error, msg string, code ...int) *Response {
 	status := 500
 	if code != nil {
 		status = code[0]
