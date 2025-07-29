@@ -10,6 +10,7 @@ import (
 )
 
 func (s *LLMService) ReportStream(sr *schema.StreamReader[*schema.Message]) error {
+
 	defer sr.Close()
 
 	i := 0

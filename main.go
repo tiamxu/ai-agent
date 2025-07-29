@@ -32,7 +32,10 @@ func main() {
 	llmService := llm.NewLLMService(chatModel)
 
 	handler := api.NewChatHandler(cfg, llmService)
-	h := server.Default(server.WithHostPorts(cfg.HttpSrv.Address))
+	h := server.Default(
+		server.WithHostPorts(cfg.HttpSrv.Address),
+		server.WithSenseClientDisconnection(true),
+	)
 
 	// 添加路由
 	h.GET("/health", func(c context.Context, ctx *app.RequestContext) {
