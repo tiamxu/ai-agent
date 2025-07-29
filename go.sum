@@ -19,10 +19,10 @@ github.com/cloudwego/base64x v0.1.5 h1:XPciSp1xaq2VCSt6lF0phncD4koWyULpl5bUxbfCy
 github.com/cloudwego/base64x v0.1.5/go.mod h1:0zlkT4Wn5C6NdauXdJRhSKRlJvmclQ1hhJgA0rcu/8w=
 github.com/cloudwego/eino v0.4.0 h1:5gMwO6HGtn/bn1M3l5cY8y9k+TO+fCcJZ14z+S3pTaQ=
 github.com/cloudwego/eino v0.4.0/go.mod h1:wUjz990apdsaOraOXdh6CdhVXq8DJsOvLsVlxNTcNfY=
-github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250724131125-2d0e75f3fe80 h1:RoTpPmBkn1fsIOhsZvNPr7LvyVlOE8hOi5tOJSvkOSE=
-github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250724131125-2d0e75f3fe80/go.mod h1:9afHKjNutl+BzJ2d4cx+Ir+GKw3zRzvNOGMV8eRhKyk=
-github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250626133421-3c142631c961 h1:fGE3RFHaAsrLjA+2fkE0YMsPrkFI6pEKKZmbhD42L7E=
-github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250626133421-3c142631c961/go.mod h1:iB0W8l+OqKNL5LtJQ9JaGYXekhsxVxrDMfnfD9L+5gc=
+github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250728111816-90d294e367aa h1:rwyBNUGzZ8+3kZVO72dY8rvYyuOdmFXwrKh58TB3o3g=
+github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250728111816-90d294e367aa/go.mod h1:FE42417EG6VkqpAMgi3uSKpLWZqE2MDEfTMFPcbKYbI=
+github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250728034832-de7648551801 h1:ICPcNPybr7GKI4kWGw1QkvyOTqyJCiYMXTPB1779Ai4=
+github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250728034832-de7648551801/go.mod h1:wRPVlA6A2a7Zje/fV9PBkP21QCivwi2RYaHteUjW+tI=
 github.com/cloudwego/gopkg v0.1.4 h1:EoQiCG4sTonTPHxOGE0VlQs+sQR+Hsi2uN0qqwu8O50=
 github.com/cloudwego/gopkg v0.1.4/go.mod h1:FQuXsRWRsSqJLsMVd5SYzp8/Z1y5gXKnVvRrWUOsCMI=
 github.com/cloudwego/hertz v0.10.1 h1:gTM2JIGO7vmRoaDz71GctyoUE19pXGuznFX55HjGs1g=
@@ -48,8 +48,8 @@ github.com/getkin/kin-openapi v0.118.0/go.mod h1:l5e9PaFUo9fyLJCPGQeXI2ML8c3P8BH
 github.com/getsentry/raven-go v0.2.0/go.mod h1:KungGk8q33+aIAZUIVWZDr2OfAEBsO49PX4NzFV5kcQ=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
-github.com/gin-gonic/gin v1.10.1 h1:T0ujvqyCSqRopADpgPgiTT63DUQVSfojyME59Ei63pQ=
-github.com/gin-gonic/gin v1.10.1/go.mod h1:4PMNQiOhvDRa013RKVbsiNwoyezlm2rm0uX/T7kzp5Y=
+github.com/gin-gonic/gin v1.10.0 h1:nTuyha1TYqgedzytsKYqna+DfLos46nTv2ygFy86HFU=
+github.com/gin-gonic/gin v1.10.0/go.mod h1:4PMNQiOhvDRa013RKVbsiNwoyezlm2rm0uX/T7kzp5Y=
 github.com/go-check/check v0.0.0-20180628173108-788fd7840127 h1:0gkP6mzaMqkmpcJYCFOLkIBwI7xFExG03bbkOkCvUPI=
 github.com/go-check/check v0.0.0-20180628173108-788fd7840127/go.mod h1:9ES+weclKsC9YodN5RgxqK/VD9HM9JsCSh7rNhMZE98=
 github.com/go-openapi/jsonpointer v0.19.5/go.mod h1:Pl9vOtqEWErmShwVjC8pYs9cog34VGT37dQOVbmoatg=
@@ -118,8 +118,8 @@ github.com/mattn/go-colorable v0.1.2 h1:/bC9yWikZXAL9uJdulbSfyVNIR3n3trXl+v8+1sx
 github.com/mattn/go-colorable v0.1.2/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
-github.com/meguminnnnnnnnn/go-openai v0.0.0-20250722145557-285a738ebcb9 h1:xFTpf7ojxmvWTNl5RvkgwSy1kn6QchFCBvYrpzSFhUU=
-github.com/meguminnnnnnnnn/go-openai v0.0.0-20250722145557-285a738ebcb9/go.mod h1:CqSFsV6AkkL2fixd25WYjRAolns+gQrY1x/Cz9c30v8=
+github.com/meguminnnnnnnnn/go-openai v0.0.0-20250723112853-3bce976e5ccc h1:vdRbmKDHZMGb5SSUVAT9u+559Vr2gScV5ie/kcOvfeE=
+github.com/meguminnnnnnnnn/go-openai v0.0.0-20250723112853-3bce976e5ccc/go.mod h1:CqSFsV6AkkL2fixd25WYjRAolns+gQrY1x/Cz9c30v8=
 github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b h1:j7+1HpAFS1zy5+Q4qx1fWh90gTKwiN4QCGoY9TWyyO4=
 github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b/go.mod h1:01TrycV0kFyexm33Z7vhZRXopbI8J3TDReVlkTgMUxE=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=

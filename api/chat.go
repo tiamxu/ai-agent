@@ -26,10 +26,6 @@ func NewChatHandler(cfg *config.Config, llmService *llm.LLMService) *ChatApi {
 	}
 }
 
-func (h *ChatApi) Health(ctx context.Context, c *app.RequestContext) {
-	c.JSON(consts.StatusOK, RespSuccess(c, ""))
-}
-
 func (h *ChatApi) Chat(ctx context.Context, c *app.RequestContext) {
 	var req types.AskQuestionReq
 

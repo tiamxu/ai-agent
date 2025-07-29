@@ -4,10 +4,13 @@ import (
 	"context"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/tiamxu/ai-agent/api"
 	"github.com/tiamxu/ai-agent/config"
 	"github.com/tiamxu/ai-agent/llm"
@@ -35,11 +38,14 @@ func main() {
 	h := server.Default(
 		server.WithHostPorts(cfg.HttpSrv.Address),
 		server.WithSenseClientDisconnection(true),
+		server.WithReadTimeout(10*time.Second),
+		server.WithWriteTimeout(30*time.Second),
+		server.WithMaxRequestBodySize(10<<20),
 	)
 
 	// 添加路由
-	h.GET("/health", func(c context.Context, ctx *app.RequestContext) {
-		handler.Health(c, ctx)
+	h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(consts.StatusOK, utils.H{"message": "pong"})
 	})
 	h.POST("/api/chat", func(c context.Context, ctx *app.RequestContext) {
 		handler.Chat(c, ctx)

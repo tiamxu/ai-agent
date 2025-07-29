@@ -2,9 +2,11 @@ module github.com/tiamxu/ai-agent
 
 go 1.23.4
 
+toolchain go1.23.11
+
 require (
 	github.com/cloudwego/eino v0.4.0
-	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250724131125-2d0e75f3fe80
+	github.com/cloudwego/eino-ext/components/model/openai v0.0.0-20250728111816-90d294e367aa
 	github.com/cloudwego/hertz v0.10.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/tiamxu/kit v0.0.0-20250308065523-50af2e24bf9c
@@ -16,7 +18,7 @@ require (
 	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
-	github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250626133421-3c142631c961 // indirect
+	github.com/cloudwego/eino-ext/libs/acl/openai v0.0.0-20250728034832-de7648551801 // indirect
 	github.com/cloudwego/gopkg v0.1.4 // indirect
 	github.com/cloudwego/netpoll v0.7.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -25,7 +27,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.7 // indirect
 	github.com/getkin/kin-openapi v0.118.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.10.1 // indirect
+	github.com/gin-gonic/gin v1.10.0 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -42,7 +44,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/meguminnnnnnnnn/go-openai v0.0.0-20250722145557-285a738ebcb9 // indirect
+	github.com/meguminnnnnnnnn/go-openai v0.0.0-20250723112853-3bce976e5ccc // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
