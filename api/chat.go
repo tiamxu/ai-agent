@@ -8,6 +8,7 @@ import (
 	"github.com/cloudwego/eino/schema"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"github.com/tiamxu/ai-agent/agent"
 	"github.com/tiamxu/ai-agent/config"
 	"github.com/tiamxu/ai-agent/llm"
 	"github.com/tiamxu/ai-agent/types"
@@ -162,4 +163,39 @@ func (h *ChatApi) executeDNSOperation(ctx context.Context, req *types.DNSOperati
 	default:
 		return "", fmt.Errorf("不支持的操作类型: %s", req.Action)
 	}
+}
+
+type ChatHandler struct {
+	agent      *agent.Agent
+	cfg        *config.Config
+	llmService *llm.LLMService
+}
+
+func NewChatApi(cfg *config.Config, llmService *llm.LLMService, agent *agent.Agent) *ChatHandler {
+	return &ChatHandler{
+		cfg:        cfg,
+		llmService: llmService,
+		agent:      agent,
+	}
+}
+
+func (h *ChatHandler) ChatAgent(ctx context.Context, c *app.RequestContext) {
+	var req types.AskQuestionReq
+
+	if err := c.BindAndValidate(&req); err != nil {
+		c.JSON(consts.StatusBadRequest, RespError(c, err, "参数错误"))
+		return
+	}
+	fmt.Println("req:", req)
+	messages, err := h.llmService.CreateMessagesFromTemplate(h.cfg, "创建test解析到192.168.1.102,域名为test.cn,ttl为300")
+	if err != nil {
+		c.JSON(consts.StatusInternalServerError, RespError(c, err, ""))
+		return
+	}
+	_, err = h.agent.Invoke(ctx, messages)
+	if err != nil {
+		c.JSON(consts.StatusInternalServerError, RespError(c, err, ""))
+		return
+	}
+
 }

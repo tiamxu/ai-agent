@@ -13,27 +13,11 @@ import (
 type Agent struct {
 	chatModel *openai.ChatModel
 	tools     []tool.BaseTool
-	agent     *compose.Runnable[[]*schema.Message, []*schema.Message]
+	agent     compose.Runnable[[]*schema.Message, []*schema.Message]
 }
 
-type Config struct {
-	OpenAIAPIKey    string
-	OpenAIModelName string
-	OpenAIBaseURL   string
-}
-
-func NewAgent(ctx context.Context, cfg Config, tools ...tool.BaseTool) (*Agent, error) {
-	// 1. 创建ChatModel
-	chatModel, err := openai.NewChatModel(ctx, &openai.ChatModelConfig{
-		BaseURL: cfg.OpenAIBaseURL,
-		Model:   cfg.OpenAIModelName,
-		APIKey:  cfg.OpenAIAPIKey,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("创建ChatModel失败: %w", err)
-	}
-
-	// 2. 绑定工具
+func NewAgent(ctx context.Context, chatModel *openai.ChatModel, tools ...tool.BaseTool) (*Agent, error) {
+	//  绑定工具
 	toolInfos := make([]*schema.ToolInfo, 0, len(tools))
 	for _, t := range tools {
 		info, err := t.Info(ctx)
@@ -47,39 +31,33 @@ func NewAgent(ctx context.Context, cfg Config, tools ...tool.BaseTool) (*Agent, 
 		return nil, fmt.Errorf("绑定工具失败: %w", err)
 	}
 
-	// 3. 创建工具节点
+	//  创建工具节点
 	toolsNode, err := compose.NewToolNode(ctx, &compose.ToolsNodeConfig{Tools: tools})
 	if err != nil {
 		return nil, fmt.Errorf("创建工具节点失败: %w", err)
 	}
 
-	// 4. 构建处理链
+	// 构建处理链
 	chain := compose.NewChain[[]*schema.Message, []*schema.Message]()
 	chain.
 		AppendChatModel(chatModel, compose.WithNodeName("chat_model")).
 		AppendToolsNode(toolsNode, compose.WithNodeName("tools"))
 
-	// 5. 编译Agent
+	// 编译Agent
 	agent, err := chain.Compile(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("编译Agent失败: %w", err)
 	}
-
 	return &Agent{
 		chatModel: chatModel,
 		tools:     tools,
-		agent:     &agent,
+		agent:     agent,
 	}, nil
 }
 
-func (a *Agent) Invoke(ctx context.Context, prompt string) ([]*schema.Message, error) {
+func (a *Agent) Invoke(ctx context.Context, in []*schema.Message) ([]*schema.Message, error) {
 
-	return a.agent.Invoke(ctx, []*schema.Message{
-		{
-			Role:    schema.User,
-			Content: prompt,
-		},
-	})
+	return a.agent.Invoke(ctx, in)
 }
 
 func (a *Agent) AddTool(ctx context.Context, tool tool.BaseTool) error {
@@ -113,6 +91,6 @@ func (a *Agent) AddTool(ctx context.Context, tool tool.BaseTool) error {
 		return err
 	}
 
-	a.agent = &agent
+	a.agent = agent
 	return nil
 }

@@ -1,4 +1,4 @@
-package tools
+package agent
 
 import (
 	"context"
@@ -74,6 +74,7 @@ func (d *DNSTool) InvokableRun(ctx context.Context, argumentsInJSON string, opts
 	if err := json.Unmarshal([]byte(argumentsInJSON), &params); err != nil {
 		return "", fmt.Errorf("解析参数失败: %v", err)
 	}
+	fmt.Printf("params:%v \n", params)
 	switch params.Action {
 	case "query":
 		return d.queryRecord(ctx, params.Domain, params.RR)

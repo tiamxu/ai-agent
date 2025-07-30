@@ -2,23 +2,19 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/cloudwego/eino-ext/components/model/openai"
-	"github.com/cloudwego/eino/components/tool"
-	"github.com/cloudwego/eino/compose"
-	"github.com/cloudwego/eino/schema"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
-	"github.com/cloudwego/hertz/pkg/common/utils"
-	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"github.com/tiamxu/ai-agent/agent"
 	"github.com/tiamxu/ai-agent/api"
 	"github.com/tiamxu/ai-agent/config"
 	"github.com/tiamxu/ai-agent/llm"
-	"github.com/tiamxu/ai-agent/tools"
 )
 
 func main() {
@@ -35,6 +31,7 @@ func main() {
 	}
 
 	llmConfig := cfg.GetActiveLLMconfig()
+	fmt.Println("llmconfig:", llmConfig)
 	// chatModel := llm.NewOpenAIChatModel(ctx, llmConfig)
 	chatModel, err := openai.NewChatModel(ctx, &openai.ChatModelConfig{
 		BaseURL: llmConfig.BaseURL,
@@ -44,56 +41,30 @@ func main() {
 	if err != nil {
 		hlog.Fatalf("创建ChatModel失败: %v", err)
 	}
-	dnsTool := tools.NewDNSTool("http://localhost:8800/")
-	toolInfos := make([]*schema.ToolInfo, 0)
-	info, err := dnsTool.Info(ctx)
-	hlog.Infof("info:%s", info)
+	hlog.Infof("chatModel创建成功:%v", chatModel)
+
+	dnsTool := agent.NewDNSTool("http://localhost:8800/")
+	aiAgent, err := agent.NewAgent(ctx, chatModel, dnsTool)
 	if err != nil {
-		hlog.Fatalf("获取工具信息失败: %v", err)
-	}
-	toolInfos = append(toolInfos, info)
-
-	if err := chatModel.BindTools(toolInfos); err != nil {
-		hlog.Fatalf("绑定工具失败: %v", err)
-	}
-	// 创建工具节点
-	toolsNode, err := compose.NewToolNode(ctx, &compose.ToolsNodeConfig{
-		Tools: []tool.BaseTool{dnsTool},
-	})
-	if err != nil {
-		hlog.Fatalf("创建工具节点失败: %v", err)
-	}
-
-	// 构建处理链
-	chain := compose.NewChain[[]*schema.Message, []*schema.Message]()
-	chain.
-		AppendChatModel(chatModel, compose.WithNodeName("chat_model")).
-		AppendToolsNode(toolsNode, compose.WithNodeName("tools"))
-
-	// 编译Agent
-	agent, err := chain.Compile(ctx)
-	if err != nil {
-		hlog.Fatalf("编译Agent失败: %v", err)
-	}
-	resp, err := agent.Invoke(ctx, []*schema.Message{
-		{
-			Role:    schema.User,
-			Content: "帮我添加一个test域名，解析到192.168.1.100",
-		},
-	})
-	if err != nil {
-		hlog.Errorf("agent.Invoke failed, err=%v", err)
-		return
+		hlog.Fatalf("创建Agent失败: %v", err)
 
 	}
-
-	for idx, msg := range resp {
-		hlog.Infof("\n")
-		hlog.Infof("message %d: %s: %s", idx, msg.Role, msg.Content)
-	}
+	hlog.Info("agent初始化成功v")
+	// msg := []*schema.Message{
+	// 	{
+	// 		Role:    schema.User,
+	// 		Content: "创建test解析到192.168.1.102,域名为test.cn,ttl为300",
+	// 	},
+	// }
+	// resp, err := aiAgent.Invoke(ctx, msg)
+	// if err != nil {
+	// 	hlog.Fatalf("调用Agent失败: %v", err)
+	// }
+	// fmt.Printf("创建DNS记录结果: %v\n", resp)
+	// fmt.Println("######")
 	llmService := llm.NewLLMService(chatModel)
 
-	handler := api.NewChatHandler(cfg, llmService)
+	handler := api.NewChatApi(cfg, llmService, aiAgent)
 	h := server.Default(
 		server.WithHostPorts(cfg.HttpSrv.Address),
 		server.WithSenseClientDisconnection(true),
@@ -103,13 +74,15 @@ func main() {
 	)
 
 	// 添加路由
-	h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
-		c.JSON(consts.StatusOK, utils.H{"message": "pong"})
+	// h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+	// 	c.JSON(consts.StatusOK, utils.H{"message": "pong"})
+	// })
+	// h.POST("/api/chat", func(c context.Context, ctx *app.RequestContext) {
+	// 	handler.Chat(c, ctx)
+	// })
+	h.POST("/api/chat2", func(c context.Context, ctx *app.RequestContext) {
+		handler.ChatAgent(c, ctx)
 	})
-	h.POST("/api/chat", func(c context.Context, ctx *app.RequestContext) {
-		handler.Chat(c, ctx)
-	})
-
 	// 在goroutine中启动HTTP服务
 	go func() {
 		hlog.Infof("启动HTTP服务，监听地址: %s", cfg.HttpSrv.Address)
