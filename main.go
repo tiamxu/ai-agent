@@ -11,6 +11,8 @@ import (
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/hertz/pkg/common/utils"
+	"github.com/cloudwego/hertz/pkg/protocol/consts"
 	"github.com/tiamxu/ai-agent/agent"
 	"github.com/tiamxu/ai-agent/api"
 	"github.com/tiamxu/ai-agent/config"
@@ -43,7 +45,7 @@ func main() {
 	}
 	hlog.Infof("chatModel创建成功:%v", chatModel)
 
-	dnsTool := agent.NewDNSTool("http://localhost:8800/")
+	dnsTool := agent.NewDNSTool("http://localhost:8801")
 	aiAgent, err := agent.NewAgent(ctx, chatModel, dnsTool)
 	if err != nil {
 		hlog.Fatalf("创建Agent失败: %v", err)
@@ -74,16 +76,13 @@ func main() {
 	)
 
 	// 添加路由
-	// h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
-	// 	c.JSON(consts.StatusOK, utils.H{"message": "pong"})
-	// })
-	// h.POST("/api/chat", func(c context.Context, ctx *app.RequestContext) {
-	// 	handler.Chat(c, ctx)
-	// })
-	h.POST("/api/chat2", func(c context.Context, ctx *app.RequestContext) {
-		handler.ChatAgent(c, ctx)
+	h.GET("/ping", func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(consts.StatusOK, utils.H{"message": "pong"})
 	})
-	// 在goroutine中启动HTTP服务
+	h.POST("/api/chat", func(c context.Context, ctx *app.RequestContext) {
+		handler.Chat(c, ctx)
+	})
+
 	go func() {
 		hlog.Infof("启动HTTP服务，监听地址: %s", cfg.HttpSrv.Address)
 		if err := h.Run(); err != nil {

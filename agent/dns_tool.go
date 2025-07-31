@@ -4,10 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"strings"
 
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/schema"
+	"github.com/tiamxu/ai-agent/types"
 )
 
 type DNSTool struct {
@@ -20,10 +24,10 @@ func NewDNSTool(baseURL string) *DNSTool {
 func (d *DNSTool) Info(_ context.Context) (*schema.ToolInfo, error) {
 	return &schema.ToolInfo{
 		Name: "aliyun_dns_operator",
-		Desc: "阿里云DNS解析记录操作工具，可以查询、创建、更新、删除DNS记录",
+		Desc: "阿里云DNS解析记录操作工具",
 		ParamsOneOf: schema.NewParamsOneOfByParams(map[string]*schema.ParameterInfo{
 			"action": {
-				Desc:     "操作类型: query, create, update, delete, enable, disable",
+				Desc:     "操作类型: query, add, update, delete, enable, disable",
 				Type:     schema.String,
 				Required: true,
 			},
@@ -78,8 +82,8 @@ func (d *DNSTool) InvokableRun(ctx context.Context, argumentsInJSON string, opts
 	switch params.Action {
 	case "query":
 		return d.queryRecord(ctx, params.Domain, params.RR)
-	case "create":
-		return d.createRecord(ctx, params.Domain, params.RR, params.Type, params.Value, params.TTL)
+	case "add":
+		return d.addRecord(ctx, params.Domain, params.RR, params.Type, params.Value, params.TTL)
 	default:
 		return "", fmt.Errorf("不支持的操作类型")
 	}
@@ -87,10 +91,59 @@ func (d *DNSTool) InvokableRun(ctx context.Context, argumentsInJSON string, opts
 
 func (d *DNSTool) queryRecord(ctx context.Context, domain, rr string) (string, error) {
 	log.Printf("查询DNS记录: domain=%s, rr=%s", domain, rr)
-	return "", nil
+	url := fmt.Sprintf("%s/api/dns/records?domain=%s&rr=%s", d.BaseURL, domain, rr)
+	if rr != "" {
+		url += fmt.Sprintf("&rr=%s", rr)
+	}
+	fmt.Printf("url:%v\n", url)
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", fmt.Errorf("查询DNS记录失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("读取响应失败: %w", err)
+	}
+
+	return string(body), nil
 }
 
-func (d *DNSTool) createRecord(ctx context.Context, domain, rr, recordType, value string, ttl int) (string, error) {
+func (d *DNSTool) createRecord(ctx context.Context, domain, rr, recordType, value string, ttl int) (json.RawMessage, error) {
+	return nil, nil
+}
+
+func (d *DNSTool) addRecord(ctx context.Context, domain, rr, recordType, value string, ttl int) (string, error) {
 	log.Printf("创建DNS记录: domain=%s, rr=%s, type=%s, value=%s, ttl=%d", domain, rr, recordType, value, ttl)
-	return "", nil
+
+	record := types.DNSRecord{
+		Domain: domain,
+		RR:     rr,
+		Type:   recordType,
+		Value:  value,
+		TTL:    ttl,
+	}
+
+	jsonData, err := json.Marshal(record)
+	if err != nil {
+		return "", fmt.Errorf("编码请求数据失败: %w", err)
+	}
+
+	resp, err := http.Post(
+		fmt.Sprintf("%s/api/dns/records", d.BaseURL),
+		"application/json",
+		strings.NewReader(string(jsonData)),
+	)
+	if err != nil {
+		return "", fmt.Errorf("添加DNS记录失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("读取响应失败: %w", err)
+	}
+
+	return string(body), nil
 }

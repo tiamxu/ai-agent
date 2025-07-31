@@ -15,3 +15,19 @@ type DNSOperationRequest struct {
 	Status   string `json:"status"`    // 状态
 	RecordID string `json:"record_id"` // 记录ID
 }
+
+type DNSRecord struct {
+	Domain   string `json:"domain"`
+	RR       string `json:"rr"`
+	Type     string `json:"type"`
+	Value    string `json:"value"`
+	TTL      int    `json:"ttl"`
+	RecordID string `json:"record_id,omitempty"`
+	Status   string `json:"status,omitempty"`
+}
+
+type DNSResponse struct {
+	Success bool        `json:"success"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
+}

@@ -40,7 +40,9 @@ func NewAgent(ctx context.Context, chatModel *openai.ChatModel, tools ...tool.Ba
 	// 构建处理链
 	chain := compose.NewChain[[]*schema.Message, []*schema.Message]()
 	chain.
-		AppendChatModel(chatModel, compose.WithNodeName("chat_model")).
+		AppendChatModel(chatModel,
+			compose.WithNodeName("chat_model"),
+		).
 		AppendToolsNode(toolsNode, compose.WithNodeName("tools"))
 
 	// 编译Agent
