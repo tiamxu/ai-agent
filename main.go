@@ -43,27 +43,17 @@ func main() {
 	if err != nil {
 		hlog.Fatalf("创建ChatModel失败: %v", err)
 	}
-	hlog.Infof("chatModel创建成功:%v", chatModel)
+	hlog.Info("chatModel创建成功")
 
 	dnsTool := agent.NewDNSTool("http://localhost:8801")
-	aiAgent, err := agent.NewAgent(ctx, chatModel, dnsTool)
+	aiAgent, err := agent.NewChainAgent(ctx, chatModel, dnsTool)
 	if err != nil {
 		hlog.Fatalf("创建Agent失败: %v", err)
 
 	}
-	hlog.Info("agent初始化成功v")
-	// msg := []*schema.Message{
-	// 	{
-	// 		Role:    schema.User,
-	// 		Content: "创建test解析到192.168.1.102,域名为test.cn,ttl为300",
-	// 	},
-	// }
-	// resp, err := aiAgent.Invoke(ctx, msg)
-	// if err != nil {
-	// 	hlog.Fatalf("调用Agent失败: %v", err)
-	// }
-	// fmt.Printf("创建DNS记录结果: %v\n", resp)
-	// fmt.Println("######")
+
+	hlog.Info("agent初始化成功")
+
 	llmService := llm.NewLLMService(chatModel)
 
 	handler := api.NewChatApi(cfg, llmService, aiAgent)
