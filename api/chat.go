@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -31,22 +30,47 @@ func (h *ChatApi) Chat(ctx context.Context, c *app.RequestContext) {
 	var req types.AskQuestionReq
 
 	if err := c.BindAndValidate(&req); err != nil {
-		c.JSON(consts.StatusBadRequest, RespError(c, err, "参数错误"))
+		hlog.Errorf("参数绑定失败: %v", err)
+		c.JSON(consts.StatusBadRequest, types.APIResponse{
+			Status:  consts.StatusBadRequest,
+			Message: "参数错误",
+			Error:   err.Error(),
+		})
 		return
 	}
-	fmt.Printf("提交参数:%v\n", req)
 
+	// 生成消息
 	messages, err := h.llmService.CreateMessagesFromTemplate(h.cfg, req.Question)
 	if err != nil {
-		c.JSON(consts.StatusInternalServerError, RespError(c, err, "生成消息模版错误"))
+		hlog.Errorf("生成消息失败: %v", err)
+		c.JSON(consts.StatusInternalServerError, types.APIResponse{
+			Status:  consts.StatusInternalServerError,
+			Message: "生成消息失败",
+			Error:   err.Error(),
+		})
 		return
 	}
+
+	// 调用Agent处理
 	resp, err := h.agent.Invoke(ctx, messages)
 
 	if err != nil {
-		c.JSON(consts.StatusInternalServerError, RespError(c, err, "agent Invoke调用失败"))
+		hlog.Errorf("Agent调用失败: %v", err)
+		c.JSON(consts.StatusInternalServerError, types.APIResponse{
+			Status:  consts.StatusInternalServerError,
+			Message: "Agent处理失败",
+			Error:   err.Error(),
+		})
 		return
 	}
-	hlog.Infof("返回内容:", resp)
-	c.JSON(consts.StatusOK, RespSuccess(c, resp))
+
+	// 格式化返回结果
+	apiResp := types.APIResponse{
+		Status:  consts.StatusOK,
+		Message: "ok",
+		Data:    resp,
+	}
+
+	c.JSON(consts.StatusOK, apiResp)
+
 }

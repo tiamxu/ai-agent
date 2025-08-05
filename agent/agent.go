@@ -8,6 +8,7 @@ import (
 	"github.com/cloudwego/eino/components/tool"
 	"github.com/cloudwego/eino/compose"
 	"github.com/cloudwego/eino/schema"
+	"github.com/tiamxu/ai-agent/types"
 )
 
 type Agent struct {
@@ -36,23 +37,22 @@ func NewChainAgent(ctx context.Context, chatModel *openai.ChatModel, tools ...to
 	if err != nil {
 		return nil, fmt.Errorf("创建工具节点失败: %w", err)
 	}
-	lambda := compose.ToList[*schema.Message]()
 
 	branchCond := func(ctx context.Context, msgs []*schema.Message) (string, error) {
-		fmt.Println("msgs:", msgs)
 		if len(msgs) == 0 {
 			return "fallback", nil
 		}
 		lastMsg := msgs[len(msgs)-1]
-		fmt.Println("tools:", toolInfos)
+		// hlog.Infof("最后消息内容: %+v", lastMsg)
+		// hlog.Infof("ToolCalls: %v", lastMsg.ToolCalls)
 
 		if lastMsg.ToolCalls != nil && len(lastMsg.ToolCalls) > 0 {
 			return "tools", nil
 		}
+
 		return "fallback", nil
 	}
 	b1 := compose.InvokableLambda(func(ctx context.Context, input []*schema.Message) ([]*schema.Message, error) {
-		fmt.Println("####b1 b1")
 		resp, err := toolsNode.Invoke(ctx, input[len(input)-1])
 		if err != nil {
 			return nil, fmt.Errorf("创建工具b1节点失败: %w", err)
@@ -60,18 +60,18 @@ func NewChainAgent(ctx context.Context, chatModel *openai.ChatModel, tools ...to
 		return resp, nil
 	})
 	b2 := compose.InvokableLambda(func(ctx context.Context, input []*schema.Message) ([]*schema.Message, error) {
-		fmt.Println("####b2 b2")
-		resp, err := chatModel.Generate(ctx, input)
-		if err != nil {
-			return nil, fmt.Errorf("创建工具b2节点失败: %w", err)
-		}
-		return []*schema.Message{resp}, nil
+		// resp, err := chatModel.Generate(ctx, input)
+		// if err != nil {
+		// 	return nil, fmt.Errorf("创建工具b2节点失败: %w", err)
+		// }
+		// return []*schema.Message{resp}, nil
+		return input, nil
 	})
 
 	// 构建处理链
 	chain := compose.NewChain[[]*schema.Message, []*schema.Message]()
 	chain.AppendChatModel(chatModel, compose.WithNodeName("chat_model")) //chatModel 返回 *schema.Message
-	chain.AppendLambda(lambda)                                           // 将 *schema.Message 转换为 []*schema.Message
+	chain.AppendLambda(compose.ToList[*schema.Message]())                // 将 *schema.Message 转换为 []*schema.Message
 	chain.AppendBranch(compose.NewChainBranch(branchCond).AddLambda("tools", b1).AddLambda("fallback", b2))
 
 	// 编译Agent
@@ -86,9 +86,31 @@ func NewChainAgent(ctx context.Context, chatModel *openai.ChatModel, tools ...to
 	}, nil
 }
 
-func (a *Agent) Invoke(ctx context.Context, in []*schema.Message) ([]*schema.Message, error) {
+func (a *Agent) Invoke(ctx context.Context, in []*schema.Message) ([]types.ToolResponse, error) {
+	// 调用底层Agent
+	resp, err := a.agent.Invoke(ctx, in)
+	if err != nil {
+		return nil, fmt.Errorf("Agent调用失败: %w", err)
+	}
 
-	return a.agent.Invoke(ctx, in)
+	// 转换响应格式
+	var toolResponses []types.ToolResponse
+	for _, msg := range resp {
+		toolResp := types.ToolResponse{
+			Role:    string(msg.Role),
+			Content: msg.Content,
+		}
+
+		// 如果是工具调用，解析额外信息
+		if msg.ToolCalls != nil && len(msg.ToolCalls) > 0 {
+			toolResp.ToolCallID = msg.ToolCalls[0].ID
+			toolResp.ToolName = msg.ToolCalls[0].Function.Name
+		}
+
+		toolResponses = append(toolResponses, toolResp)
+	}
+
+	return toolResponses, nil
 }
 
 // func (a *Agent) AddTool(ctx context.Context, tool tool.BaseTool) error {

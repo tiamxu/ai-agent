@@ -16,8 +16,8 @@ func (s *LLMService) CreateMessagesFromTemplate(cfg *config.Config, question str
 	}
 
 	template := prompt.FromMessages(schema.FString,
-		schema.SystemMessage(cfg.MessageTemplates.System.Content),
-		schema.UserMessage(cfg.MessageTemplates.User.Template),
+		schema.SystemMessage(cfg.MessageTemplates.System.Content), //系统消息模版
+		schema.UserMessage(cfg.MessageTemplates.User.Template),    //用户消息模版
 	)
 
 	messages, err := template.Format(context.Background(), map[string]any{

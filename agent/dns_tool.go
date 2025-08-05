@@ -24,20 +24,20 @@ func NewDNSTool(baseURL string) *DNSTool {
 func (d *DNSTool) Info(_ context.Context) (*schema.ToolInfo, error) {
 	return &schema.ToolInfo{
 		Name: "aliyun_dns_operator",
-		Desc: "阿里云DNS解析记录操作工具",
+		Desc: "阿里云DNS解析记录操作工具。输入域名时，请确保正确拆分主机记录（rr）和主域名（domain）。例如：'test.example.com' 应拆分为 rr='test', domain='example.com'",
 		ParamsOneOf: schema.NewParamsOneOfByParams(map[string]*schema.ParameterInfo{
 			"action": {
-				Desc:     "操作类型: query, add, update, delete, enable, disable",
+				Desc:     "操作类型: 查询(query), 添加(add), update, delete, enable, disable",
 				Type:     schema.String,
 				Required: true,
 			},
 			"domain": {
-				Desc:     "域名",
+				Desc:     "主域名（如 'example.com'），不包含子域名",
 				Type:     schema.String,
 				Required: true,
 			},
 			"rr": {
-				Desc: "主机记录",
+				Desc: "主机记录（如 'test'），如果是根域名（如 'example.com'），则设为 '@'",
 				Type: schema.String,
 			},
 			"type": {
@@ -76,9 +76,8 @@ func (d *DNSTool) InvokableRun(ctx context.Context, argumentsInJSON string, opts
 		RecordID string `json:"record_id"`
 	}
 	if err := json.Unmarshal([]byte(argumentsInJSON), &params); err != nil {
-		return "", fmt.Errorf("解析参数失败: %v", err)
+		return "", fmt.Errorf("解析参数失败: %w", err)
 	}
-	fmt.Printf("params:%v \n", params)
 	switch params.Action {
 	case "query":
 		return d.queryRecord(ctx, params.Domain, params.RR)
@@ -102,16 +101,15 @@ func (d *DNSTool) queryRecord(ctx context.Context, domain, rr string) (string, e
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("DNS查询返回错误状态码: %d", resp.StatusCode)
+	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("读取响应失败: %w", err)
 	}
 
 	return string(body), nil
-}
-
-func (d *DNSTool) createRecord(ctx context.Context, domain, rr, recordType, value string, ttl int) (json.RawMessage, error) {
-	return nil, nil
 }
 
 func (d *DNSTool) addRecord(ctx context.Context, domain, rr, recordType, value string, ttl int) (string, error) {
@@ -127,7 +125,7 @@ func (d *DNSTool) addRecord(ctx context.Context, domain, rr, recordType, value s
 
 	jsonData, err := json.Marshal(record)
 	if err != nil {
-		return "", fmt.Errorf("编码请求数据失败: %w", err)
+		return "", fmt.Errorf("编码DNS记录失败: %w", err)
 	}
 
 	resp, err := http.Post(
